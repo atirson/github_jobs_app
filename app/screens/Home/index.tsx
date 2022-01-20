@@ -1,10 +1,14 @@
 import React from 'react';
-import {View} from 'react-native';
-
-// import { Container } from './styles';
+import Input from '@cuteapp/components/Input';
+import {Container, Title} from './styles';
 
 const Home: React.FC = () => {
-  return <View style={{flex: 1, backgroundColor: 'blue'}} />;
+  return (
+    <Container>
+      <Title>Encontre o seu Novo Trabalho</Title>
+      <Input placeholder="Pesquise por empresa, título..." iconName="search" />
+    </Container>
+  );
 };
 
 export default Home;
