@@ -3,7 +3,7 @@ import {theme} from '@cuteapp/constants/theme';
 
 export const Container = styled.View`
   width: 190px;
-  height: 220px;
+  height: 160px;
   margin-top: 24px;
   color: #fff;
 
@@ -19,8 +19,8 @@ export const Container = styled.View`
 
 export const Avatar = styled.Image`
   margin-top: 8px;
-  width: 96px;
-  height: 96px;
+  width: 68px;
+  height: 68px;
   border-radius: 48px;
 `;
 

@@ -67,6 +67,10 @@ const JobCard = ({job}: JobCardProps) => {
             key: 'Devin component displays a scrolling list of changing content.',
           },
           {key: 'Dan'},
+          {
+            key: 'Devin component displays a scrolling list of changing content.',
+          },
+          {key: 'Dan'},
         ]}
         renderItem={({item, index}) => (
           <Topics>

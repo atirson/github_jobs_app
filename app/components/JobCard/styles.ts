@@ -7,7 +7,7 @@ interface TagsProps {
 }
 
 export const Container = styled.View`
-  height: 140px;
+  height: 260px;
   width: 100%;
   background-color: ${theme.colors.secondary};
   margin-top: 15px;
@@ -45,6 +45,8 @@ export const ContainerTags = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+
+  margin-top: 8px;
 `;
 
 export const Tags = styled.Text<TagsProps>`

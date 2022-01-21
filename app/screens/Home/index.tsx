@@ -73,7 +73,16 @@ const Home: React.FC = () => {
       </ContainerRepository>
       <ContainerJobs>
         <SubTitle>Vagas Recentes</SubTitle>
-        <JobCard />
+        <FlatList
+          showsHorizontalScrollIndicator={false}
+          style={{marginBottom: 120}}
+          data={data}
+          keyExtractor={item => String(item.id)}
+          renderItem={({item}) => <JobCard />}
+          // onEndReached={loadJobs}
+          onEndReachedThreshold={0.1}
+          // ListFooterComponent={<Loading loading={loading} />}
+        />
       </ContainerJobs>
     </Container>
   );
