@@ -12,3 +12,17 @@ export const Title = styled.Text`
   color: #fff;
   font-weight: bold;
 `;
+
+export const ContainerRepository = styled.View`
+  margin-top: 40px;
+`;
+
+export const SubTitle = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+`;
+
+export const ContainerJobs = styled.View`
+  margin-top: 20px;
+`;

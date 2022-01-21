@@ -4,7 +4,7 @@ import {theme} from '@cuteapp/constants/theme';
 import Feather from 'react-native-vector-icons/Feather';
 
 export const Container = styled.View`
-  margin-top: 48px;
+  margin-top: 25px;
   display: flex;
   flex-direction: row;
   align-items: center;
