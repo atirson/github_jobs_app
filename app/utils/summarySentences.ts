@@ -1,14 +1,11 @@
-import SummaryTool from 'node-summary';
-import {v4 as uuid} from 'uuid';
+import tokenizer from 'sbd';
+import removeMd from 'remove-markdown';
 
-export function summarySentences(text: string, numberOfSentences: number = 5) {
-  SummaryTool.getSortedSentences(text, numberOfSentences, (err, summary) => {
-    if (err) {
-      return console.log('Something went wrong man!');
-    }
+export function summarySentences(text: string) {
+  var sentences = tokenizer.sentences(
+    removeMd(text.replace(/(\r\n|\n|\r)/gm, ' ').replace(/[\\"]/g, '')),
+    {sanitize: true},
+  );
 
-    return JSON.stringify(
-      summary.map((sentence: string) => ({id: uuid(), topic: sentence})),
-    );
-  });
+  return sentences.slice(0, 3).join(' ');
 }

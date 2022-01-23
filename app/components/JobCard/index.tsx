@@ -2,12 +2,13 @@
 import React from 'react';
 import {View} from 'react-native';
 import {formatDistance, parseISO} from 'date-fns';
-
+import {truncate} from 'lodash';
+import {summarySentences} from '@cuteapp/utils/summarySentences';
 import {
   Container,
   TitleJob,
   TitleTopics,
-  // Topics,
+  Topics,
   ContainerTags,
   Tags,
   DateText,
@@ -34,10 +35,13 @@ interface JobCardProps {
 }
 
 const JobCard = ({job}: JobCardProps) => {
+  const text = summarySentences(job.body);
+
   return (
     <Container key={job.id}>
       <TitleJob>{job.title}</TitleJob>
-      <TitleTopics>Resumo da Vaga</TitleTopics>
+      <TitleTopics>Introdução da Vaga</TitleTopics>
+      <Topics>{truncate(text, {length: 250})}</Topics>
       <ContainerTags>
         <View style={{flexDirection: 'row'}}>
           {job.labels.slice(0, 3).map(label => (
