@@ -7,12 +7,16 @@ interface TagsProps {
 }
 
 export const Container = styled.View`
-  height: 260px;
+  /* height: 260px; */
   width: 100%;
   background-color: ${theme.colors.secondary};
   margin-top: 15px;
   border-radius: 8px;
   padding: 8px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 
 export const TitleJob = styled.Text`

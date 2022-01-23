@@ -22,7 +22,3 @@ export const SubTitle = styled.Text`
   font-weight: bold;
   color: #fff;
 `;
-
-export const ContainerJobs = styled.View`
-  margin-top: 20px;
-`;
