@@ -4,50 +4,19 @@ import React from 'react';
 import Input from '@cuteapp/components/Input';
 import {Container, Title, ContainerRepository, SubTitle} from './styles';
 import RepositoryCard from '@cuteapp/components/RepositoryCard';
-import {FlatList} from 'react-native';
+import {Alert, FlatList} from 'react-native';
 import JobCard from '@cuteapp/components/JobCard';
 import Loading from '@cuteapp/components/Loading';
 import api from '@cuteapp/services/api';
 
 interface RepositoryCardProps {
-  id?: string;
-  uri?: string;
-  name?: string;
-  openIssues?: number;
+  owner: {
+    id: string;
+    avatar_url: string;
+  };
+  full_name: string;
+  open_issues_count: number;
 }
-
-const data: RepositoryCardProps[] = [
-  {
-    id: '1',
-    uri: 'https://avatars.githubusercontent.com/u/30732658?v=4',
-    name: 'Backend-Br/Vagas',
-    openIssues: 500,
-  },
-  {
-    id: '2',
-    uri: 'https://avatars.githubusercontent.com/u/30732658?v=4',
-    name: 'Backend-Br/Vagas',
-    openIssues: 500,
-  },
-  {
-    id: '3',
-    uri: 'https://avatars.githubusercontent.com/u/30732658?v=4',
-    name: 'Backend-Br/Vagas',
-    openIssues: 500,
-  },
-  {
-    id: '4',
-    uri: 'https://avatars.githubusercontent.com/u/30732658?v=4',
-    name: 'Backend-Br/Vagas',
-    openIssues: 500,
-  },
-  {
-    id: '5',
-    uri: 'https://avatars.githubusercontent.com/u/30732658?v=4',
-    name: 'Backend-Br/Vagas',
-    openIssues: 500,
-  },
-];
 
 interface Labels {
   id: string;
@@ -67,8 +36,10 @@ export interface Job {
 
 const Home: React.FC = () => {
   const [jobs, setJobs] = React.useState<Job[]>([]);
+  const [repositories, setRepositories] = React.useState<RepositoryCardProps[]>(
+    [],
+  );
   const [isLoadingJobs, setIsLoadingJobs] = React.useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoadingRepositories, setIsLoadingRepositories] =
     React.useState(false);
   const [page, setPage] = React.useState(1);
@@ -76,6 +47,35 @@ const Home: React.FC = () => {
   React.useEffect(() => {
     loadJobs();
   }, []);
+
+  React.useEffect(() => {
+    loadRepositoriesInfo();
+  }, []);
+
+  async function loadRepositoriesInfo(): Promise<void> {
+    // eslint-disable-next-line curly
+    if (isLoadingRepositories) return;
+    setIsLoadingRepositories(true);
+
+    Promise.all([
+      api.get<RepositoryCardProps>('/repos/frontendbr/vagas'),
+      api.get<RepositoryCardProps>('/repos/backend-br/vagas'),
+    ])
+      .then(response => {
+        setIsLoadingRepositories(false);
+        response.map(repository => {
+          return setRepositories([...repositories, repository.data]);
+        });
+      })
+      .catch((err: Error) => {
+        setIsLoadingRepositories(false);
+        console.log(err.message);
+        Alert.alert(
+          'Erro',
+          'Erro ao carregar as vagas, tente novamente mais tarde.',
+        );
+      });
+  }
 
   async function loadJobs(): Promise<void> {
     // eslint-disable-next-line curly
@@ -114,7 +114,7 @@ const Home: React.FC = () => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 style={{marginBottom: 20}}
-                data={data}
+                data={repositories}
                 keyExtractor={item => String(item.id)}
                 renderItem={({item}) => (
                   <RepositoryCard repositoryData={item} />

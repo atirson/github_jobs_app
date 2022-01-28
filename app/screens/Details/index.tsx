@@ -1,7 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {Linking, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import Markdown from 'react-native-showdown';
 
 import {Container, Title, ContainerTags, Tags, TitlePage} from './styles';
@@ -53,7 +52,6 @@ const Details = ({route}: any) => {
           }}
           markdown={job.body}
           css={css}
-          // style={{marginBottom: 40}}
         />
       </Container>
     </View>

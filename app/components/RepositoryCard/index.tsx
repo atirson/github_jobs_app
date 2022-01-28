@@ -3,10 +3,12 @@ import React from 'react';
 import {Container, Avatar, NameRepository, OpenIssues} from './styles';
 
 interface RepositoryCardProps {
-  id?: string;
-  uri?: string;
-  name?: string;
-  openIssues?: number;
+  owner: {
+    id: string;
+    avatar_url: string;
+  };
+  full_name: string;
+  open_issues_count: number;
 }
 
 interface RepositoryCard {
@@ -16,9 +18,11 @@ interface RepositoryCard {
 const RepositoryCard = ({repositoryData}: RepositoryCard) => {
   return (
     <Container>
-      <Avatar source={{uri: repositoryData.uri}} />
-      <NameRepository>{repositoryData.name}</NameRepository>
-      <OpenIssues>Vagas Abertas - {repositoryData.openIssues}</OpenIssues>
+      <Avatar source={{uri: repositoryData.owner.avatar_url}} />
+      <NameRepository>{repositoryData.full_name}</NameRepository>
+      <OpenIssues>
+        Vagas Abertas - {repositoryData.open_issues_count}
+      </OpenIssues>
     </Container>
   );
 };
