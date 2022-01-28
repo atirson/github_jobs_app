@@ -8,6 +8,7 @@ import {Alert, FlatList} from 'react-native';
 import JobCard from '@cuteapp/components/JobCard';
 import Loading from '@cuteapp/components/Loading';
 import api from '@cuteapp/services/api';
+import {AxiosResponse} from 'axios';
 
 interface RepositoryCardProps {
   owner: {
@@ -36,9 +37,7 @@ export interface Job {
 
 const Home: React.FC = () => {
   const [jobs, setJobs] = React.useState<Job[]>([]);
-  const [repositories, setRepositories] = React.useState<RepositoryCardProps[]>(
-    [],
-  );
+  const [repositories] = React.useState<RepositoryCardProps[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = React.useState(false);
   const [isLoadingRepositories, setIsLoadingRepositories] =
     React.useState(false);
@@ -62,10 +61,7 @@ const Home: React.FC = () => {
       api.get<RepositoryCardProps>('/repos/backend-br/vagas'),
     ])
       .then(response => {
-        setIsLoadingRepositories(false);
-        response.map(repository => {
-          return setRepositories([...repositories, repository.data]);
-        });
+        response.map(repository => repositories.push(repository.data));
       })
       .catch((err: Error) => {
         setIsLoadingRepositories(false);
@@ -74,6 +70,8 @@ const Home: React.FC = () => {
           'Erro',
           'Erro ao carregar as vagas, tente novamente mais tarde.',
         );
+      }).finally(() => {
+        setIsLoadingRepositories(false);
       });
   }
 
@@ -115,7 +113,7 @@ const Home: React.FC = () => {
                 showsHorizontalScrollIndicator={false}
                 style={{marginBottom: 20}}
                 data={repositories}
-                keyExtractor={item => String(item.id)}
+                keyExtractor={item => String(item.owner.id)}
                 renderItem={({item}) => (
                   <RepositoryCard repositoryData={item} />
                 )}
@@ -130,7 +128,6 @@ const Home: React.FC = () => {
           </>
         }
         ListFooterComponent={<Loading loading={isLoadingJobs} />}
-        // ListEmptyComponent={<Loading loading={isLoadingJobs} />}
       />
     </Container>
   );
