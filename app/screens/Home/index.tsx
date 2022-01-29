@@ -8,6 +8,7 @@ import {Alert, FlatList, TouchableOpacity} from 'react-native';
 import {JobCard} from '@cuteapp/components/JobCard';
 import Loading from '@cuteapp/components/Loading';
 import api from '@cuteapp/services/api';
+import {factory} from '@cuteapp/factory/service.factory';
 
 interface RepositoryCardProps {
   id: string;
@@ -51,7 +52,7 @@ const Home: React.FC = () => {
 
   React.useEffect(() => {
     loadJobs();
-  }, []);
+  }, [activeRepositories]);
 
   React.useMemo(() => {
     loadRepositoriesInfo();
@@ -97,16 +98,10 @@ const Home: React.FC = () => {
     if (isLoadingJobs) return;
     setIsLoadingJobs(true);
 
-    const responseBackend = await api.get(
-      `/repos/backend-br/vagas/issues?per_page=10&page=${page}`,
-    );
+    const getJobs = await factory(activeRepositories, page);
 
-    const responseFrontend = await api.get(
-      `/repos/frontendbr/vagas/issues?per_page=10&page=${page}`,
-    );
-
-    const response = [...responseBackend.data, ...responseFrontend.data].sort(
-      (a, b) => {
+    setJobs(
+      [...jobs, ...getJobs].sort((a, b) => {
         if (a.updated_at < b.updated_at) {
           return 1;
         }
@@ -114,10 +109,8 @@ const Home: React.FC = () => {
           return -1;
         }
         return 0;
-      },
+      }),
     );
-
-    setJobs([...jobs, ...response]);
     setPage(page + 1);
     setIsLoadingJobs(false);
   }
@@ -126,6 +119,9 @@ const Home: React.FC = () => {
     if (nameRepository === activeRepositories.key) {
       nameRepository = 'all';
     }
+
+    setJobs([]);
+    setPage(1);
 
     switch (nameRepository) {
       case 'frontendbr/vagas':
