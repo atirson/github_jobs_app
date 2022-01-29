@@ -16,6 +16,7 @@ const Details = ({route}: any) => {
       background-color: #2E3138;
       color: #fff;
       margin-bottom: 40px;
+      overflow-wrap: break-word;
     }
   `;
 

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {memo} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 import {formatDistance, parseISO} from 'date-fns';
 import {truncate} from 'lodash';
@@ -36,7 +36,7 @@ interface JobCardProps {
   job: Job;
 }
 
-const JobCard = ({job}: JobCardProps) => {
+const JobCardComponent = ({job}: JobCardProps) => {
   const navigation = useNavigation();
   const text = summarySentences(job.body);
 
@@ -66,4 +66,6 @@ const JobCard = ({job}: JobCardProps) => {
   );
 };
 
-export default JobCard;
+export const JobCard = memo(JobCardComponent, (prevProps, nextProps) => {
+  return Object.is(prevProps.job, nextProps.job);
+});

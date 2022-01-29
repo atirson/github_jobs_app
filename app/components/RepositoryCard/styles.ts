@@ -21,7 +21,6 @@ export const Avatar = styled.Image`
   margin-top: 8px;
   width: 68px;
   height: 68px;
-  border-radius: 48px;
 `;
 
 export const NameRepository = styled.Text`
@@ -31,6 +30,7 @@ export const NameRepository = styled.Text`
 `;
 
 export const OpenIssues = styled.Text`
-  color: #d2d4d3;
+  color: #fff;
+  font-weight: bold;
   font-size: 14px;
 `;

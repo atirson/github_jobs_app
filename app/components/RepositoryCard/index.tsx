@@ -1,10 +1,11 @@
-import React from 'react';
-
+import React, {memo} from 'react';
+import {theme} from '@cuteapp/constants/theme';
+import {ActiveRepository} from '@cuteapp/screens/Home';
 import {Container, Avatar, NameRepository, OpenIssues} from './styles';
 
 interface RepositoryCardProps {
+  id: string;
   owner: {
-    id: string;
     avatar_url: string;
   };
   full_name: string;
@@ -13,11 +14,19 @@ interface RepositoryCardProps {
 
 interface RepositoryCard {
   repositoryData: RepositoryCardProps;
+  active: ActiveRepository;
 }
 
-const RepositoryCard = ({repositoryData}: RepositoryCard) => {
+const RepositoryCardComponent = ({repositoryData, active}: RepositoryCard) => {
   return (
-    <Container>
+    <Container
+      style={
+        active.key === repositoryData.full_name
+          ? {
+              backgroundColor: theme.colors.opposity,
+            }
+          : {}
+      }>
       <Avatar source={{uri: repositoryData.owner.avatar_url}} />
       <NameRepository>{repositoryData.full_name}</NameRepository>
       <OpenIssues>
@@ -27,4 +36,9 @@ const RepositoryCard = ({repositoryData}: RepositoryCard) => {
   );
 };
 
-export default RepositoryCard;
+export const RepositoryCard = memo(
+  RepositoryCardComponent,
+  (prevProps, nextProps) => {
+    return Object.is(prevProps.active, nextProps.active);
+  },
+);

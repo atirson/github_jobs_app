@@ -3,16 +3,15 @@
 import React from 'react';
 import Input from '@cuteapp/components/Input';
 import {Container, Title, ContainerRepository, SubTitle} from './styles';
-import RepositoryCard from '@cuteapp/components/RepositoryCard';
-import {Alert, FlatList} from 'react-native';
-import JobCard from '@cuteapp/components/JobCard';
+import {RepositoryCard} from '@cuteapp/components/RepositoryCard';
+import {Alert, FlatList, TouchableOpacity} from 'react-native';
+import {JobCard} from '@cuteapp/components/JobCard';
 import Loading from '@cuteapp/components/Loading';
 import api from '@cuteapp/services/api';
-import {AxiosResponse} from 'axios';
 
 interface RepositoryCardProps {
+  id: string;
   owner: {
-    id: string;
     avatar_url: string;
   };
   full_name: string;
@@ -35,6 +34,11 @@ export interface Job {
   updated_at: string;
 }
 
+export type ActiveRepository = {
+  name: 'all' | 'frontend' | 'backend';
+  key?: 'frontendbr/vagas' | 'backend-br/vagas';
+};
+
 const Home: React.FC = () => {
   const [jobs, setJobs] = React.useState<Job[]>([]);
   const [repositories] = React.useState<RepositoryCardProps[]>([]);
@@ -42,12 +46,14 @@ const Home: React.FC = () => {
   const [isLoadingRepositories, setIsLoadingRepositories] =
     React.useState(false);
   const [page, setPage] = React.useState(1);
+  const [activeRepositories, setActiveRepositories] =
+    React.useState<ActiveRepository>({name: 'all'});
 
   React.useEffect(() => {
     loadJobs();
   }, []);
 
-  React.useEffect(() => {
+  React.useMemo(() => {
     loadRepositoriesInfo();
   }, []);
 
@@ -61,7 +67,17 @@ const Home: React.FC = () => {
       api.get<RepositoryCardProps>('/repos/backend-br/vagas'),
     ])
       .then(response => {
-        response.map(repository => repositories.push(repository.data));
+        response.map(repository => {
+          const isExist = repositories.findIndex(
+            repo => repo.id === repository.data.id,
+          );
+
+          if (isExist === -1) {
+            return repositories.push(repository.data);
+          }
+
+          return;
+        });
       })
       .catch((err: Error) => {
         setIsLoadingRepositories(false);
@@ -70,7 +86,8 @@ const Home: React.FC = () => {
           'Erro',
           'Erro ao carregar as vagas, tente novamente mais tarde.',
         );
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoadingRepositories(false);
       });
   }
@@ -80,13 +97,47 @@ const Home: React.FC = () => {
     if (isLoadingJobs) return;
     setIsLoadingJobs(true);
 
-    const response = await api.get(
+    const responseBackend = await api.get(
       `/repos/backend-br/vagas/issues?per_page=10&page=${page}`,
     );
 
-    setJobs([...jobs, ...response.data]);
+    const responseFrontend = await api.get(
+      `/repos/frontendbr/vagas/issues?per_page=10&page=${page}`,
+    );
+
+    const response = [...responseBackend.data, ...responseFrontend.data].sort(
+      (a, b) => {
+        if (a.updated_at < b.updated_at) {
+          return 1;
+        }
+        if (a.updated_at > b.updated_at) {
+          return -1;
+        }
+        return 0;
+      },
+    );
+
+    setJobs([...jobs, ...response]);
     setPage(page + 1);
     setIsLoadingJobs(false);
+  }
+
+  function handleActiveRepository(nameRepository: string) {
+    if (nameRepository === activeRepositories.key) {
+      nameRepository = 'all';
+    }
+
+    switch (nameRepository) {
+      case 'frontendbr/vagas':
+        setActiveRepositories({name: 'frontend', key: nameRepository});
+        break;
+      case 'backend-br/vagas':
+        setActiveRepositories({name: 'backend', key: nameRepository});
+        break;
+      default:
+        setActiveRepositories({name: 'all'});
+        break;
+    }
   }
 
   return (
@@ -113,9 +164,15 @@ const Home: React.FC = () => {
                 showsHorizontalScrollIndicator={false}
                 style={{marginBottom: 20}}
                 data={repositories}
-                keyExtractor={item => String(item.owner.id)}
+                keyExtractor={item => String(item.id)}
                 renderItem={({item}) => (
-                  <RepositoryCard repositoryData={item} />
+                  <TouchableOpacity
+                    onPress={() => handleActiveRepository(item.full_name)}>
+                    <RepositoryCard
+                      repositoryData={item}
+                      active={activeRepositories}
+                    />
+                  </TouchableOpacity>
                 )}
                 // onEndReached={loadJobs}
                 onEndReachedThreshold={0.1}
@@ -124,7 +181,7 @@ const Home: React.FC = () => {
                 }
               />
             </ContainerRepository>
-            <SubTitle>Vagas Recentes</SubTitle>
+            <SubTitle>Vagas Recentes - {activeRepositories.name}</SubTitle>
           </>
         }
         ListFooterComponent={<Loading loading={isLoadingJobs} />}
