@@ -103,15 +103,10 @@ const Home = () => {
     if (isLoadingJobs) return;
     setIsLoadingJobs(true);
 
-    const getLabels = await factoryLabel(activeRepositories);
+    const getLabels = await factoryLabel();
     const getJobs = await factory(activeRepositories, page);
 
-    // console.log([...getLabels[0], ...getLabels[1]]);
-    if (getJobs.length === 2) {
-      setLabels([...getLabels[0], ...getLabels[1]]);
-    } else {
-      setLabels([getLabels[0]]);
-    }
+    setLabels([...labels, ...getLabels]);
 
     setJobs(
       [...jobs, ...getJobs].sort((a, b) => {
