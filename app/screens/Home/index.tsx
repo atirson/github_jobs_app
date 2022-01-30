@@ -1,14 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
-import Input from '@cuteapp/components/Input';
+import React, {useState, useMemo, useEffect} from 'react';
+import {MultiSelectComponent} from '@cuteapp/components/MultiSelect';
 import {Container, Title, ContainerRepository, SubTitle} from './styles';
 import {RepositoryCard} from '@cuteapp/components/RepositoryCard';
-import {Alert, FlatList, TouchableOpacity} from 'react-native';
+import {Alert, FlatList, TouchableOpacity, LogBox} from 'react-native';
 import {JobCard} from '@cuteapp/components/JobCard';
 import Loading from '@cuteapp/components/Loading';
 import api from '@cuteapp/services/api';
-import {factory} from '@cuteapp/factory/service.factory';
+import {factory} from '@cuteapp/factory/jobs.factory';
+import {factoryLabel} from '@cuteapp/factory/labels.factory';
 
 interface RepositoryCardProps {
   id: string;
@@ -40,21 +41,25 @@ export type ActiveRepository = {
   key?: 'frontendbr/vagas' | 'backend-br/vagas';
 };
 
-const Home: React.FC = () => {
-  const [jobs, setJobs] = React.useState<Job[]>([]);
-  const [repositories] = React.useState<RepositoryCardProps[]>([]);
-  const [isLoadingJobs, setIsLoadingJobs] = React.useState(false);
-  const [isLoadingRepositories, setIsLoadingRepositories] =
-    React.useState(false);
-  const [page, setPage] = React.useState(1);
+const Home = () => {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [repositories] = useState<RepositoryCardProps[]>([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(false);
+  const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
+  const [page, setPage] = useState(1);
   const [activeRepositories, setActiveRepositories] =
-    React.useState<ActiveRepository>({name: 'all'});
+    useState<ActiveRepository>({name: 'all'});
+  const [labels, setLabels] = useState<Labels[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    LogBox.ignoreAllLogs(true);
+  }, []);
+
+  useMemo(() => {
     loadJobs();
   }, [activeRepositories]);
 
-  React.useMemo(() => {
+  useMemo(() => {
     loadRepositoriesInfo();
   }, []);
 
@@ -98,7 +103,15 @@ const Home: React.FC = () => {
     if (isLoadingJobs) return;
     setIsLoadingJobs(true);
 
+    const getLabels = await factoryLabel(activeRepositories);
     const getJobs = await factory(activeRepositories, page);
+
+    // console.log([...getLabels[0], ...getLabels[1]]);
+    if (getJobs.length === 2) {
+      setLabels([...getLabels[0], ...getLabels[1]]);
+    } else {
+      setLabels([getLabels[0]]);
+    }
 
     setJobs(
       [...jobs, ...getJobs].sort((a, b) => {
@@ -121,6 +134,7 @@ const Home: React.FC = () => {
     }
 
     setJobs([]);
+    setLabels([]);
     setPage(1);
 
     switch (nameRepository) {
@@ -149,9 +163,13 @@ const Home: React.FC = () => {
         ListHeaderComponent={
           <>
             <Title>Github Jobs</Title>
-            <Input
-              placeholder="Pesquise por empresa, título..."
-              iconName="search"
+            <MultiSelectComponent
+              displayKey="name"
+              items={labels}
+              searchInputPlaceholderText="Filtrar vagas por Labels"
+              selectText="Selecione as labels"
+              uniqueKey="id"
+              key={labels.length}
             />
             <ContainerRepository>
               <SubTitle>Repositórios com Vagas</SubTitle>
@@ -170,7 +188,6 @@ const Home: React.FC = () => {
                     />
                   </TouchableOpacity>
                 )}
-                // onEndReached={loadJobs}
                 onEndReachedThreshold={0.1}
                 ListFooterComponent={
                   <Loading loading={isLoadingRepositories} />
