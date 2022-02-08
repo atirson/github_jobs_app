@@ -4,12 +4,12 @@ import React, {useState, useMemo, useEffect} from 'react';
 import {MultiSelectComponent} from '@cuteapp/components/MultiSelect';
 import {Container, Title, ContainerRepository, SubTitle} from './styles';
 import {RepositoryCard} from '@cuteapp/components/RepositoryCard';
-import {Alert, FlatList, TouchableOpacity, LogBox} from 'react-native';
+import {FlatList, TouchableOpacity, LogBox, Alert} from 'react-native';
 import {JobCard} from '@cuteapp/components/JobCard';
 import Loading from '@cuteapp/components/Loading';
-import api from '@cuteapp/services/api';
-import {factory} from '@cuteapp/factory/jobs.factory';
-import {factoryLabel} from '@cuteapp/factory/labels.factory';
+import {getJobs} from '@cuteapp/core/jobs.service';
+import {getLabels} from '@cuteapp/core/labels.service';
+import {getDetails} from '@cuteapp/core/details.service';
 
 interface RepositoryCardProps {
   id: string;
@@ -37,13 +37,13 @@ export interface Job {
 }
 
 export type ActiveRepository = {
-  name: 'all' | 'frontend' | 'backend';
-  key?: 'frontendbr/vagas' | 'backend-br/vagas';
+  name: 'all' | 'frontend' | 'backend' | 'react';
+  key?: 'frontendbr/vagas' | 'backend-br/vagas' | 'react-brasil/vagas';
 };
 
 const Home = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [repositories] = useState<RepositoryCardProps[]>([]);
+  const [repositories, setRepositories] = useState<RepositoryCardProps[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
   const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
   const [page, setPage] = useState(1);
@@ -68,34 +68,15 @@ const Home = () => {
     if (isLoadingRepositories) return;
     setIsLoadingRepositories(true);
 
-    Promise.all([
-      api.get<RepositoryCardProps>('/repos/frontendbr/vagas'),
-      api.get<RepositoryCardProps>('/repos/backend-br/vagas'),
-    ])
-      .then(response => {
-        response.map(repository => {
-          const isExist = repositories.findIndex(
-            repo => repo.id === repository.data.id,
-          );
+    const responseDetails = await getDetails();
 
-          if (isExist === -1) {
-            return repositories.push(repository.data);
-          }
+    if (responseDetails === 'Error') {
+      return Alert.alert('Erro', 'Não foi possível carregar os dados');
+    }
 
-          return;
-        });
-      })
-      .catch((err: Error) => {
-        setIsLoadingRepositories(false);
-        console.log(err.message);
-        Alert.alert(
-          'Erro',
-          'Erro ao carregar as vagas, tente novamente mais tarde.',
-        );
-      })
-      .finally(() => {
-        setIsLoadingRepositories(false);
-      });
+    setRepositories(responseDetails);
+
+    setIsLoadingRepositories(false);
   }
 
   async function loadJobs(): Promise<void> {
@@ -103,13 +84,12 @@ const Home = () => {
     if (isLoadingJobs) return;
     setIsLoadingJobs(true);
 
-    const getLabels = await factoryLabel();
-    const getJobs = await factory(activeRepositories, page);
-
-    setLabels([...labels, ...getLabels]);
+    const responseJobs = await getJobs(activeRepositories, page);
+    const responseLabels = await getLabels(activeRepositories);
+    setLabels([...labels, ...responseLabels]);
 
     setJobs(
-      [...jobs, ...getJobs].sort((a, b) => {
+      [...jobs, ...responseJobs].sort((a, b) => {
         if (a.updated_at < b.updated_at) {
           return 1;
         }
@@ -138,6 +118,9 @@ const Home = () => {
         break;
       case 'backend-br/vagas':
         setActiveRepositories({name: 'backend', key: nameRepository});
+        break;
+      case 'react-brasil/vagas':
+        setActiveRepositories({name: 'react', key: nameRepository});
         break;
       default:
         setActiveRepositories({name: 'all'});
