@@ -35,7 +35,6 @@ const MultiSelectElement = ({
         selectedItems={selectedItems}
         selectText={selectText}
         searchInputPlaceholderText={searchInputPlaceholderText}
-        onChangeInput={() => {}}
         altFontFamily="ProximaNova-Light"
         tagRemoveIconColor="#fff"
         tagBorderColor="#fff"

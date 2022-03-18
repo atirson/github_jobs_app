@@ -69,7 +69,7 @@ const Home = () => {
     setIsLoadingRepositories(true);
 
     const responseDetails = await getDetails();
-
+    console.log(responseDetails);
     if (responseDetails === 'Error') {
       return Alert.alert('Erro', 'Não foi possível carregar os dados');
     }
