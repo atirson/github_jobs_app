@@ -1,15 +1,18 @@
 name: PR to Google Chat
-# Teste
+
 on:
   pull_request:
     types: [opened, reopened, synchronize]
 
 jobs:
-  notify:
+  notify-gchat:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: List files (debug)
+        run: ls -l
+
+      - name: List all files (debug)
+        run: ls -lR
 
       - name: Send PR details to Google Chat
         env:
