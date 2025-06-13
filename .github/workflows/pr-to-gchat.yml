@@ -8,18 +8,22 @@ jobs:
   notify-gchat:
     runs-on: ubuntu-latest
     steps:
-      - name: List files (debug)
-        run: ls -l
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: List all files (debug)
-        run: ls -lR
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-      - name: Send PR details to Google Chat
+      - name: Enviar PR para Google Chat
         env:
           GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
           PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
           PR_URL: ${{ github.event.pull_request.html_url }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_STATUS: ${{ github.event.action }}
         run: |
           pip install requests
           python .github/scripts/send_to_gchat.py
