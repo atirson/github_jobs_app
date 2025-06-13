@@ -22,4 +22,4 @@ jobs:
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           pip install requests
-          python send_to_gchat.py
+          python .github/workflows/send_to_gchat.py
